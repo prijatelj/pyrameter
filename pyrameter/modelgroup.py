@@ -134,13 +134,13 @@ class ModelGroup(object):
             self.model_ids.sort(key=lambda m: self.models[m].complexity,
                                 reverse=True)
             for i in range(len(self.model_ids)):
-                self.models[i].rank *= i
+                self.models[self.model_ids[i]].rank *= i
 
         if self.priority_sort:
             self.model_ids.sort(key=lambda m: self.models[m].priority,
                                 reverse=True)
             for i in range(len(self.model_ids)):
-                self.models[i].rank *= i
+                self.models[self.model_ids[i]].rank *= i
 
         self.model_ids.sort(key=lambda m: self.models[m].rank, reverse=True)
 
