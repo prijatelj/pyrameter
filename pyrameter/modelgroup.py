@@ -65,7 +65,9 @@ class ModelGroup(object):
         return s
 
     def add_model(self, model):
-        """Add a model to this group.
+        """Add a model to this group if not already present.
+
+        If already present, simply update the model.
 
         Parameters
         ----------
@@ -80,7 +82,9 @@ class ModelGroup(object):
         if isinstance(model, Model):
             if not self.priority_sort:
                 model.priority_update_freq = -1
-            self.model_ids.append(model.id)
+            # Update if already present. Otherwise, add new.
+            if not (model.id in self.models):
+                self.model_ids.append(model.id)
             self.models[model.id] = model
         else:
             msg = '{} is not an instance of pyrameter.models.Model'
@@ -170,7 +174,7 @@ class ModelGroup(object):
         Probabilistic model selection follows a discrete planck distribution
         limited to the number of models in the group.
         """
-        if not model_id:
+        if model_id is None:
             if self.complexity_sort or self.priority_sort:
                 p = np.array([scipy.stats.planck.pmf(i, 0.5)
                              for i in range(len(self.models))])
