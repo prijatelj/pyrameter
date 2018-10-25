@@ -31,6 +31,8 @@ class ModelGroup(object):
                  priority_sort=True):
         self.models = {}
         self.model_ids = []
+        self.former_model_ids = []
+        self.former_models = {}
         self.complexity_sort = complexity_sort
         self.priority_sort = priority_sort
 
@@ -86,6 +88,9 @@ class ModelGroup(object):
             if not (model.id in self.models):
                 self.model_ids.append(model.id)
             self.models[model.id] = model
+            if not (model.id in self.former_models):
+                self.former_model_ids.append(model.id)
+            self.former_models[model.id] = model
         else:
             msg = '{} is not an instance of pyrameter.models.Model'
             raise TypeError(msg.format(model))
@@ -146,7 +151,7 @@ class ModelGroup(object):
             for i in range(len(self.model_ids)):
                 self.models[self.model_ids[i]].rank *= i
 
-        self.model_ids.sort(key=lambda m: self.models[m].rank, reverse=True)
+        self.model_ids.sort(key=lambda m: self.models[m].rank)
 
     def generate(self, model_id=None):
         """Generate a set of hyperparameter values from a model.
@@ -192,7 +197,8 @@ class ModelGroup(object):
         return params
 
     def optimal(self, mode='best', count=1):
-        """Get the optimal observed result(s) from among the models.
+        """Get the optimal observed result(s) from among the models past and
+        present.
 
         Parameters
         ----------
@@ -216,7 +222,7 @@ class ModelGroup(object):
         return results
 
     def _optimal_best_mode(self, count):
-        """Get the optimal observed results across all models.
+        """Get the optimal observed results across all models past and present.
 
          Parameters
          ----------
@@ -233,8 +239,8 @@ class ModelGroup(object):
         results = []
 
         # Concatenate the results from each model into a single list
-        for mid in self.model_ids:
-            model = self.models[mid]
+        for mid in self.former_model_ids:
+            model = self.former_models[mid]
             results.extend(
                 [r.to_json() for r in model.results if r.loss is not None])
 
@@ -244,7 +250,7 @@ class ModelGroup(object):
         return results
 
     def _optimal_model_mode(self, count):
-        """Get the optimal observed results from each model.
+        """Get the optimal observed results from each model past and present.
 
          Parameters
          ----------
@@ -258,8 +264,8 @@ class ModelGroup(object):
             A dictionary of lists of results indexed by model id.
         """
         optimal = {}
-        for mid in self.model_ids:
-            model = self.models[mid]
+        for mid in self.former_model_ids:
+            model = self.former_models[mid]
             results = sorted(
                 [r.to_json() for r in model.results if r.loss is not None],
                 key=lambda x: x['loss'])
@@ -267,7 +273,7 @@ class ModelGroup(object):
         return optimal
 
     def register_result(self, model_id, result_id, loss, results=None):
-        """Add a result to the given model.
+        """Add a result to the given model (either past or present).
 
         Parameters
         ----------
@@ -280,11 +286,11 @@ class ModelGroup(object):
         results : dict, optional
             Additional values to store.
         """
-        if model_id in self.models:
+        if model_id in self.former_models:
             submissions, params = \
-                self.models[model_id].register_result(result_id,
-                                                      loss,
-                                                      results=results)
+                self.former_models[model_id].register_result(result_id,
+                                                             loss,
+                                                             results=results)
         else:
             msg = 'No model found with id {}'.format(model_id)
             raise KeyError(msg)
@@ -293,7 +299,7 @@ class ModelGroup(object):
 
     @property
     def result_count(self):
-        return sum([len(m.results) for m in self.models.values()])
+        return sum([len(m.results) for m in self.former_models.values()])
 
     def save(self):
-        self.backend.save([self.models[m] for m in self.model_ids])
+        self.backend.save([self.former_models[m] for m in self.former_model_ids])
