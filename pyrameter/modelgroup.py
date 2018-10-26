@@ -138,6 +138,8 @@ class ModelGroup(object):
         """
         for v in self.models.values():
             v.rank = 1
+            print(v.id)
+            print(v.results)
 
         if self.complexity_sort:
             self.model_ids.sort(key=lambda m: self.models[m].complexity,
