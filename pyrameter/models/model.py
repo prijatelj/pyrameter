@@ -92,6 +92,9 @@ class Model(object):
         self._complexity = 1.0
         self.rank = None
 
+        # Used to update models this was copied from.
+        self.parent = None
+
         self.update_complexity = update_complexity
         self.domain_added = bool(self.domains)
         self.priority_update_freq = priority_update_freq
@@ -168,6 +171,8 @@ class Model(object):
         should_update = (len(self.results) % self.priority_update_freq == 0)
         if not self.recompute_priority and should_update:
             self.recompute_priority = True
+        if self.parent is not None:
+            self.parent.add_result(result)
 
     def register_result(self, result_id, loss, results=None):
         """Update an existing Result by id.
@@ -212,9 +217,12 @@ class Model(object):
                     curr = curr[p]
                 curr[path[-1]] = value.value
 
+        if self.parent is not None:
+            self.parent.register_result(result_id, loss, results)
+
         return found.submissions, params
 
-    def copy(self):
+    def copy(self, parent_inherits_results=False):
         """Make a copy of this model.
 
         Returns
@@ -226,6 +234,8 @@ class Model(object):
                            results=[r for r in self.results],
                            update_complexity=self.update_complexity,
                            priority_update_freq=self.priority_update_freq)
+        if parent_inherits_results:
+            m.parent = self
         return m
 
     def merge(self, other):
