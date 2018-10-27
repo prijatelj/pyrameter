@@ -138,8 +138,6 @@ class ModelGroup(object):
         """
         for v in self.models.values():
             v.rank = 1
-            print(v.id)
-            print(v.results)
 
         if self.complexity_sort:
             self.model_ids.sort(key=lambda m: self.models[m].complexity,
@@ -183,6 +181,7 @@ class ModelGroup(object):
         """
         if model_id is None:
             if self.complexity_sort or self.priority_sort:
+                self.sort_models()
                 p = np.array([scipy.stats.planck.pmf(i, 0.5)
                              for i in range(len(self.models))])
             else:
