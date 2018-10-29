@@ -301,7 +301,7 @@ class ModelGroup(object):
             raise KeyError(msg)
 
         # Now that we have more information, sort!
-        self.sort()
+        self.sort_models()
 
         return submissions, params
 
