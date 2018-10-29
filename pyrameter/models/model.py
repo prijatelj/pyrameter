@@ -293,7 +293,7 @@ class Model(object):
     def priority(self):
         # If a parent has been registered, use it to get priority
         if self.parent is not None:
-            self._priority = parent.priority()
+            self._priority = self.parent.priority
             return self._priority
 
         # Only compute priority if requested and an update is necessary
