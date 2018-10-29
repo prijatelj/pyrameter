@@ -143,13 +143,17 @@ class ModelGroup(object):
             self.model_ids.sort(key=lambda m: self.models[m].complexity,
                                 reverse=True)
             for i in range(len(self.model_ids)):
-                self.models[self.model_ids[i]].rank *= i
+                self.models[self.model_ids[i]].rank *= (i + 1)
 
         if self.priority_sort:
             self.model_ids.sort(key=lambda m: self.models[m].priority,
                                 reverse=True)
             for i in range(len(self.model_ids)):
-                self.models[self.model_ids[i]].rank *= i
+                self.models[self.model_ids[i]].rank *= (i + 1)
+
+        for model in self.models.values():
+            model.rank *= model.jhibshma_rank
+            
 
         self.model_ids.sort(key=lambda m: self.models[m].rank)
 
@@ -295,6 +299,9 @@ class ModelGroup(object):
         else:
             msg = 'No model found with id {}'.format(model_id)
             raise KeyError(msg)
+
+        # Now that we have more information, sort!
+        self.sort()
 
         return submissions, params
 

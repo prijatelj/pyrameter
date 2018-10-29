@@ -90,6 +90,7 @@ class Model(object):
 
         self._priority = 1.0
         self._complexity = 1.0
+        self.jhibshma_rank = 1
         self.rank = None
 
         # Used to update models this was copied from.
