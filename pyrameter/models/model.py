@@ -230,7 +230,8 @@ class Model(object):
         A new ``pyrameter.models.Model`` instance with copies of all model
         attributes.
         """
-        m = self.__class__(domains=[d for d in self.domains],
+        m = self.__class__(id=self.id,
+                           domains=[d for d in self.domains],
                            results=[r for r in self.results],
                            update_complexity=self.update_complexity,
                            priority_update_freq=self.priority_update_freq)
