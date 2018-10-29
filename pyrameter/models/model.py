@@ -290,8 +290,14 @@ class Model(object):
 
     @property
     def priority(self):
+        # If a parent has been registered, use it to get priority
+        if self.parent is not None:
+            self._priority = parent.priority()
+            return self._priority
+
         # Only compute priority if requested and an update is necessary
         if self.priority_update_freq >= 0 and self.recompute_priority:
+
             vec = self.results_to_feature_vector()
 
             split = int(np.ceil(vec.shape[0] *
