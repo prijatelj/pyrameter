@@ -151,6 +151,15 @@ class ModelGroup(object):
             for i in range(len(self.model_ids)):
                 self.models[self.model_ids[i]].rank *= i
 
+        # TODO include general scheduler function here via params
+        #if scheduler is not None:
+        #    rank_adjustments = scheduler(self.model_ids)# pass only what is necessary, models names and hyperparameters along with their hardware usage metrics.
+        #   change only what is necessary using the scheduler: model ranks.
+        #
+        #    # rank_adjustments is the adjustment for model in order given to it
+        #    for i in range(len(self.model_ids)):
+        #        self.models[self.model_ids[i]].rank *= rank_adjustments[i]
+
         self.model_ids.sort(key=lambda m: self.models[m].rank)
 
     def generate(self, model_id=None):
