@@ -6,6 +6,7 @@ import scipy.stats
 from pyrameter.models.model import Model
 from pyrameter.db import backend_factory
 
+from pyrameter.sort_methods import simulated_annealing
 
 class ModelGroup(object):
     """Collection of models in a hyperparameter search.
@@ -28,13 +29,23 @@ class ModelGroup(object):
         models during hyperparameter generation.
     """
     def __init__(self, models=None, backend=None, complexity_sort=True,
-                 priority_sort=True):
+                 priority_sort=True, sort_method=None):
         self.models = {}
         self.model_ids = []
         self.former_model_ids = []
         self.former_models = {}
         self.complexity_sort = complexity_sort
         self.priority_sort = priority_sort
+
+        # given string name of sort method, assign the function call
+        if sort_method is not None and isinstance(sort_method, str):
+            if sort_method == "simulated_annealing":
+                self.sort_method = scheduler.simulated_annealing.default_simulated_annealing
+            else:
+                # TODO throw error and fail gracefully.
+                self.sort_method = None
+        else:
+            self.sort_method = None
 
         if models is not None:
             models = [models] if not isinstance(models, list) else models
@@ -152,13 +163,12 @@ class ModelGroup(object):
                 self.models[self.model_ids[i]].rank *= i
 
         # TODO include general scheduler function here via params
-        #if scheduler is not None:
-        #    rank_adjustments = scheduler(self.model_ids)# pass only what is necessary, models names and hyperparameters along with their hardware usage metrics.
-        #   change only what is necessary using the scheduler: model ranks.
-        #
-        #    # rank_adjustments is the adjustment for model in order given to it
-        #    for i in range(len(self.model_ids)):
-        #        self.models[self.model_ids[i]].rank *= rank_adjustments[i]
+        if sort_method is not None:
+            rank_adjustments = sort_method(self)
+
+            for i in range(len(self.model_ids)):
+                self.models[self.model_ids[i]].rank *= rank_adjustments[i]
+
 
         self.model_ids.sort(key=lambda m: self.models[m].rank)
 

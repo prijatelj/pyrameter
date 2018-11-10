@@ -4,7 +4,7 @@ from pyrameter.scope import Scope
 
 
 def build(specification, db=None, method='random', complexity_sort=True,
-          priority_sort=True, *args, **kwargs):
+          priority_sort=True, sort_method=None, *args, **kwargs):
     """Construct hierarchical hyperparameter search spaces.
 
     Parameters
@@ -31,7 +31,7 @@ def build(specification, db=None, method='random', complexity_sort=True,
     # Prep the specification as a scope
     if isinstance(specification, dict):
         specification = Scope(**specification)
-    
+
     # Set the generation model to the requested method
     specification.model = method
 
@@ -40,5 +40,6 @@ def build(specification, db=None, method='random', complexity_sort=True,
     backend = backend_factory(db, *args, **kwargs)
     model_group = ModelGroup(models=models, backend=backend,
                              complexity_sort=complexity_sort,
-                             priority_sort=priority_sort)
+                             priority_sort=priority_sort,
+                             sort_method=sort_method)
     return model_group
