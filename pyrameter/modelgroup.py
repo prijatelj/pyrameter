@@ -6,7 +6,8 @@ import scipy.stats
 from pyrameter.models.model import Model
 from pyrameter.db import backend_factory
 
-from pyrameter.sort_methods import simulated_annealing
+#from pyrameter.sort_methods import basic_sorts
+from sort_methods import basic_sorts
 
 class ModelGroup(object):
     """Collection of models in a hyperparameter search.
@@ -39,8 +40,8 @@ class ModelGroup(object):
 
         # given string name of sort method, assign the function call
         if sort_method is not None and isinstance(sort_method, str):
-            if sort_method == "simulated_annealing":
-                self.sort_method = scheduler.simulated_annealing.default_simulated_annealing
+            if sort_method == "random_sort":
+                self.sort_method = basic_sorts.random_sort
             else:
                 # TODO throw error and fail gracefully.
                 self.sort_method = None
