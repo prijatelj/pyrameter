@@ -6,8 +6,8 @@ import scipy.stats
 from pyrameter.models.model import Model
 from pyrameter.db import backend_factory
 
-#from pyrameter.sort_methods import basic_sorts
-from .sort_methods import basic_sorts
+from pyrameter.sort_methods import basic_sorts
+#from .sort_methods import basic_sorts
 
 class ModelGroup(object):
     """Collection of models in a hyperparameter search.
