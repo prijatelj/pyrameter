@@ -10,7 +10,8 @@ setup(
     author_email='jkinniso@nd.edu',
     packages=['pyrameter',
               'pyrameter.models',
-              'pyrameter.db'],
+              'pyrameter.db',
+              'pyrameter.sort_methods'],
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Science/Research',
