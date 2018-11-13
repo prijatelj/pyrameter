@@ -153,8 +153,10 @@ class ModelGroup(object):
 
         self.model_ids.sort(key=lambda m: self.models[m].rank)
 
-    def probabilities(self):
-        if self.complexity_sort or self.priority_sort:
+    def probabilities(self, modified):
+        if modified:
+            p = np.array([self.models[self.model_ids[i]].modified_prob for i in range(len(self.models))])
+        elif self.complexity_sort or self.priority_sort:
             p = np.array([scipy.stats.planck.pmf(i, 0.5)
                          for i in range(len(self.models))])
         else:
@@ -189,7 +191,7 @@ class ModelGroup(object):
         limited to the number of models in the group.
         """
         if model_id is None:
-            idx = np.random.choice(np.arange(len(self.models)), p=self.probabilities()[0])
+            idx = np.random.choice(np.arange(len(self.models)), p=self.probabilities(True)[0])
             params = (self.model_ids[idx],) + \
                 self.models[self.model_ids[idx]]()
         else:
