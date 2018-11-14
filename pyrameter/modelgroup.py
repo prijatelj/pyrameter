@@ -322,3 +322,8 @@ class ModelGroup(object):
 
     def save(self):
         self.backend.save([self.former_models[m] for m in self.former_model_ids])
+
+    def load(self):
+        models = self.backend.load()
+        for model in models:
+            self.add_model(model)
