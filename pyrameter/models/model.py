@@ -99,7 +99,7 @@ class Model(object):
         self.domain_added = bool(self.domains)
         self.priority_update_freq = priority_update_freq
         self.recompute_priority = False
-        self.modified_prob = 1
+        self.modified_prob = 1.0
 
     def __eq__(self, other):
         eq_domains = all(
