@@ -99,6 +99,8 @@ class ModelGroup(object):
             if not (model.id in self.models):
                 self.model_ids.append(model.id)
             self.models[model.id] = model
+            # TODO carry 'assign_all' sort_method throughout to separate Justus'
+            # method from the others, esp. default shadho
             if not (model.id in self.former_models):
                 self.former_model_ids.append(model.id)
             self.former_models[model.id] = model
