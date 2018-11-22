@@ -247,8 +247,10 @@ class ModelGroup(object):
         results = []
 
         # Concatenate the results from each model into a single list
-        for mid in self.former_model_ids:
-            model = self.former_models[mid]
+        #for mid in self.former_model_ids:
+        #    model = self.former_models[mid]
+        for model_id in self.model_ids:
+            model = self.models[model_id]
             results.extend(
                 [r.to_json() for r in model.results if r.loss is not None])
 
