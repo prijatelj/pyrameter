@@ -14,3 +14,5 @@ def random_order(model_group):
     know how they relate to random chance.
     """
     return np.random.uniform(size=len(model_groups.model_ids))
+
+#def uniform_distribution remove plank distrib and us uniform random distribution. The above was meant to order it and pass it to plank, it'd be nice to also have just uniform random distribution.
