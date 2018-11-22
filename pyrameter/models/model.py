@@ -93,7 +93,10 @@ class Model(object):
         self.rank = None
 
         # Used to update models this was copied from.
-        self.parent = None
+        # NOTE Unnecessary. SHADHO backend is where all models reside, copies is
+        # inefficient and all uses of this can be handled in SHADHO through use
+        # of the backend, which serves as a history of all models.
+        #self.parent = None
 
         self.update_complexity = update_complexity
         self.domain_added = bool(self.domains)
@@ -171,8 +174,8 @@ class Model(object):
         should_update = (len(self.results) % self.priority_update_freq == 0)
         if not self.recompute_priority and should_update:
             self.recompute_priority = True
-        if self.parent is not None:
-            self.parent.add_result(result)
+        #if self.parent is not None:
+        #    self.parent.add_result(result)
 
     def register_result(self, result_id, loss, results=None):
         """Update an existing Result by id.
@@ -217,12 +220,13 @@ class Model(object):
                     curr = curr[p]
                 curr[path[-1]] = value.value
 
-        if self.parent is not None:
-            self.parent.register_result(result_id, loss, results)
+        #if self.parent is not None:
+        #    self.parent.register_result(result_id, loss, results)
 
         return found.submissions, params
 
-    def copy(self, parent_inherits_results=False):
+    #def copy(self, parent_inherits_results=False):
+    def copy(self):
         """Make a copy of this model.
 
         Returns
@@ -235,8 +239,8 @@ class Model(object):
                            results=[r for r in self.results],
                            update_complexity=self.update_complexity,
                            priority_update_freq=self.priority_update_freq)
-        if parent_inherits_results:
-            m.parent = self
+        #if parent_inherits_results:
+        #    m.parent = self
         return m
 
     def merge(self, other):
@@ -291,13 +295,12 @@ class Model(object):
     @property
     def priority(self):
         # If a parent has been registered, use it to get priority
-        if self.parent is not None:
-            self._priority = self.parent.priority
-            return self._priority
+        #if self.parent is not None:
+        #    self._priority = self.parent.priority
+        #    return self._priority
 
         # Only compute priority if requested and an update is necessary
         if self.priority_update_freq >= 0 and self.recompute_priority:
-
             vec = self.results_to_feature_vector()
 
             split = int(np.ceil(vec.shape[0] *

@@ -11,7 +11,7 @@ setup(
     packages=['pyrameter',
               'pyrameter.models',
               'pyrameter.db',
-              'pyrameter.sort_methods'],
+              'pyrameter.model_sorts'],
     classifiers=[
         'Development Status :: 3 - Alpha',
         'Intended Audience :: Science/Research',

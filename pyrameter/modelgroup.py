@@ -6,7 +6,7 @@ import scipy.stats
 from pyrameter.models.model import Model
 from pyrameter.db import backend_factory
 
-from pyrameter.sort_methods import basic_sorts
+from pyrameter.model_sorts import basic_sorts
 
 class ModelGroup(object):
     """Collection of models in a hyperparameter search.
@@ -29,23 +29,15 @@ class ModelGroup(object):
         models during hyperparameter generation.
     """
     def __init__(self, models=None, backend=None, complexity_sort=True,
-                 priority_sort=True, sort_method=None):
+                 priority_sort=True, model_sort=None):
         self.models = {}
         self.model_ids = []
-        self.former_model_ids = []
-        self.former_models = {}
+        #self.former_model_ids = []
+        #self.former_models = {}
         self.complexity_sort = complexity_sort
         self.priority_sort = priority_sort
+        self.model_sort = model_sort
 
-        # given string name of sort method, assign the function call
-        if sort_method is not None and isinstance(sort_method, str):
-            if sort_method == "random_sort":
-                self.sort_method = basic_sorts.random_sort
-            else:
-                # TODO throw error and fail gracefully.
-                self.sort_method = None
-        else:
-            self.sort_method = None
 
         if models is not None:
             models = [models] if not isinstance(models, list) else models
@@ -78,9 +70,7 @@ class ModelGroup(object):
         return s
 
     def add_model(self, model):
-        """Add a model to this group if not already present.
-
-        If already present, simply update the model.
+        """Add a model to this group, or update if already present.
 
         Parameters
         ----------
@@ -96,14 +86,12 @@ class ModelGroup(object):
             if not self.priority_sort:
                 model.priority_update_freq = -1
             # Update if already present. Otherwise, add new.
-            if not (model.id in self.models):
+            if model.id not in self.models:
                 self.model_ids.append(model.id)
-            self.models[model.id] = model
-            # TODO carry 'assign_all' sort_method throughout to separate Justus'
-            # method from the others, esp. default shadho
-            if not (model.id in self.former_models):
-                self.former_model_ids.append(model.id)
-            self.former_models[model.id] = model
+                self.models[model.id] = model
+            #if not (model.id in self.former_models):
+            #    self.former_model_ids.append(model.id)
+            #self.former_models[model.id] = model
         else:
             msg = '{} is not an instance of pyrameter.models.Model'
             raise TypeError(msg.format(model))
@@ -165,12 +153,12 @@ class ModelGroup(object):
                 self.models[self.model_ids[i]].rank *= i
 
         # TODO include general scheduler function here via params
-        if sort_method is not None:
-            rank_adjustments = sort_method(self)
-
-            for i in range(len(self.model_ids)):
-                self.models[self.model_ids[i]].rank *= rank_adjustments[i]
-
+        #if model_sort is not None and isinstance(model_sort, str):
+        #    if model_sort == "random_order":
+        #       rank_adjustments = basic_sorts.random_order(self)
+        #
+        #       for i in range(len(self.model_ids)):
+        #            self.models[self.model_ids[i]].rank *= rank_adjustments[i]
 
         self.model_ids.sort(key=lambda m: self.models[m].rank)
 
@@ -218,8 +206,7 @@ class ModelGroup(object):
         return params
 
     def optimal(self, mode='best', count=1):
-        """Get the optimal observed result(s) from among the models past and
-        present.
+        """Get the optimal observed result(s) from among all models.
 
         Parameters
         ----------
@@ -243,7 +230,7 @@ class ModelGroup(object):
         return results
 
     def _optimal_best_mode(self, count):
-        """Get the optimal observed results across all models past and present.
+        """Get the optimal observed results across all models.
 
          Parameters
          ----------
@@ -271,7 +258,7 @@ class ModelGroup(object):
         return results
 
     def _optimal_model_mode(self, count):
-        """Get the optimal observed results from each model past and present.
+        """Get the optimal observed results from each model.
 
          Parameters
          ----------
@@ -285,16 +272,18 @@ class ModelGroup(object):
             A dictionary of lists of results indexed by model id.
         """
         optimal = {}
-        for mid in self.former_model_ids:
-            model = self.former_models[mid]
+        #for model_id in self.former_model_ids:
+        #    model = self.former_models[model_id]
+        for model_id in self.model_ids:
+            model = self.models[model_id]
             results = sorted(
                 [r.to_json() for r in model.results if r.loss is not None],
                 key=lambda x: x['loss'])
-            optimal[mid] = results[:count]
+            optimal[model_id] = results[:count]
         return optimal
 
     def register_result(self, model_id, result_id, loss, results=None):
-        """Add a result to the given model (either past or present).
+        """Add a result to the given model.
 
         Parameters
         ----------
@@ -307,11 +296,13 @@ class ModelGroup(object):
         results : dict, optional
             Additional values to store.
         """
-        if model_id in self.former_models:
+        #if model_id in self.former_models:
+        if model_id in self.models:
             submissions, params = \
-                self.former_models[model_id].register_result(result_id,
-                                                             loss,
-                                                             results=results)
+                self.models[model_id].register_result(result_id,
+                                                      loss,
+                                                      results=results)
+            #    self.former_models[model_id].register_result(result_id,
         else:
             msg = 'No model found with id {}'.format(model_id)
             raise KeyError(msg)
@@ -320,10 +311,12 @@ class ModelGroup(object):
 
     @property
     def result_count(self):
-        return sum([len(m.results) for m in self.former_models.values()])
+        #return sum([len(m.results) for m in self.former_models.values()])
+        return sum([len(m.results) for m in self.models.values()])
 
     def save(self):
-        self.backend.save([self.former_models[m] for m in self.former_model_ids])
+        #self.backend.save([self.former_models[m] for m in self.former_model_ids])
+        self.backend.save([self.models[m] for m in self.model_ids])
 
     def load(self):
         models = self.backend.load()
