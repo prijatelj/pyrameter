@@ -6,8 +6,6 @@ import scipy.stats
 from pyrameter.models.model import Model
 from pyrameter.db import backend_factory
 
-from pyrameter.model_sorts import basic_sorts
-
 class ModelGroup(object):
     """Collection of models in a hyperparameter search.
 
@@ -152,13 +150,7 @@ class ModelGroup(object):
             for i in range(len(self.model_ids)):
                 self.models[self.model_ids[i]].rank *= i
 
-        # TODO include general scheduler function here via params
-        #if model_sort is not None and isinstance(model_sort, str):
-        #    if model_sort == "random_order":
-        #       rank_adjustments = basic_sorts.random_order(self)
-        #
-        #       for i in range(len(self.model_ids)):
-        #            self.models[self.model_ids[i]].rank *= rank_adjustments[i]
+        # NOTE, if the priority and complexity sort are both false, then uniform random sort is done. Only use pyrameter_model_sort and add the code if a different pyrameter sort or distribution is required.
 
         self.model_ids.sort(key=lambda m: self.models[m].rank)
 
